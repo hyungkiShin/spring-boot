@@ -2,6 +2,7 @@ package tobyspring.helloboot;
 
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,14 @@ import java.io.IOException;
 public class HellobootApplication {
 
     public static void main(String[] args) {
+
+        GenericApplicationContext applicationContext = new GenericApplicationContext();
+        applicationContext.registerBean(HelloController.class); // bean 등록
+        applicationContext.refresh(); // bean object 를 만들어준다
+
         TomcatServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
 
         WebServer webServer = serverFactory.getWebServer(servletContext -> {
-            final HelloController helloController = new HelloController();
 
             servletContext.addServlet("frontcontroller", new HttpServlet() {
                 @Override
@@ -29,13 +34,11 @@ public class HellobootApplication {
 
                         String name = req.getParameter("name");
 
+                        HelloController helloController = applicationContext.getBean(HelloController.class);
                         String hello = helloController.hello(name);
 
-                        resp.setStatus(HttpStatus.OK.value()); // 상태코드
-                        resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Header
+                        resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
                         resp.getWriter().println(hello); // body
-                    } else if (req.getRequestURI().equals("/user")) {
-                        //
                     } else {
                         resp.setStatus(HttpStatus.NOT_FOUND.value());
                     }
