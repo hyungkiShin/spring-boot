@@ -18,25 +18,30 @@ public class HellobootApplication {
     public static void main(String[] args) {
         TomcatServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
 
-        WebServer webServer = serverFactory.getWebServer(servletContext ->
-                servletContext.addServlet("frontcontroller", new HttpServlet() {
-                    @Override
-                    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-                        // 인증, 보안, 다국어, 공통 기능 한다고 가정
-                        if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
+        WebServer webServer = serverFactory.getWebServer(servletContext -> {
+            final HelloController helloController = new HelloController();
 
-                            String name = req.getParameter("name");
+            servletContext.addServlet("frontcontroller", new HttpServlet() {
+                @Override
+                protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+                    // 인증, 보안, 다국어, 공통 기능 한다고 가정
+                    if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
 
-                            resp.setStatus(HttpStatus.OK.value()); // 상태코드
-                            resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Header
-                            resp.getWriter().println("Hello " + name); // body
-                        } else if (req.getRequestURI().equals("/user")) {
-                            //
-                        } else {
-                            resp.setStatus(HttpStatus.NOT_FOUND.value());
-                        }
+                        String name = req.getParameter("name");
+
+                        String hello = helloController.hello(name);
+
+                        resp.setStatus(HttpStatus.OK.value()); // 상태코드
+                        resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Header
+                        resp.getWriter().println(hello); // body
+                    } else if (req.getRequestURI().equals("/user")) {
+                        //
+                    } else {
+                        resp.setStatus(HttpStatus.NOT_FOUND.value());
                     }
-                }).addMapping("/*"));
+                }
+            }).addMapping("/*");
+        });
         webServer.start();
     }
 }
