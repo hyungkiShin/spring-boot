@@ -1,5 +1,6 @@
 package tobyspring.helloboot;
 
+import org.apache.catalina.core.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,9 +12,11 @@ import java.util.Objects;
 public class HelloController {
 
     private final HelloService helloService;
+    private final ApplicationContext applicationContext;
 
-    public HelloController(final HelloService helloService) {
+    public HelloController(final HelloService helloService, final ApplicationContext applicationContext) {
         this.helloService = helloService;
+        this.applicationContext = applicationContext;
     }
 
     @GetMapping
